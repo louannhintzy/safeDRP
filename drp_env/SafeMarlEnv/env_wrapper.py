@@ -19,7 +19,7 @@ class SafeEnv(DrpEnv):
 
 			ri_act = 0
 
-			#act8，他のエージェントと向かう先が同じ場合
+			#act8，他のエージェントと向かう先が同じ場合 
 			act8_flag = True
 			#自分がノード上にいる時
 			if act8_flag:
