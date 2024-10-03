@@ -19,8 +19,7 @@ class SafeEnv(DrpEnv):
 
 			ri_act = 0
 
-			#act8
-			#"""
+			#act8，他のエージェントと向かう先が同じ場合
 			act8_flag = True
 			#自分がノード上にいる時
 			if act8_flag:
@@ -31,11 +30,9 @@ class SafeEnv(DrpEnv):
 								joint_action[i] = self.current_start[i] #act8-3
 								ri_act -= 5*self.speed
 								break
-			#"""
 
-			#act9
+			#act9，正面衝突
 			act9_flag = True
-			#"""
 			if act9_flag:
 				#自分がノード上にいる時
 				if self.current_goal[i] == None:
@@ -46,7 +43,6 @@ class SafeEnv(DrpEnv):
 								ri_act -= 5*self.speed
 								break
 							
-			#"""
 			ri_tmp.append(ri_act)
 		
 		obs, ri_array, self.terminated, info = super().step(joint_action)
@@ -63,19 +59,3 @@ class SafeEnv(DrpEnv):
 	
 	def valid_action_mask(self):
 		pass
-
-"""
-class SafeEnv(DrpEnv):
-	def step(self, joint_action):
-		obs, ri_array, self.terminated, info = super().step(joint_action)
-		return obs, ri_array, self.terminated, info
-	
-
-	def reset(self, seed=None, options=None):
-		obs = super().reset()
-		return obs
-	
-	def valid_action_mask(self):
-		pass
-
-"""
