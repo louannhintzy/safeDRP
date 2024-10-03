@@ -50,7 +50,7 @@ for an, map_name in product(agent_num, map_list):
 
 for an, map_name in product(agent_num, map_list):
     register(
-        id="drpChallenge-{0}agent_{1}-v2".format(an, map_name),
+        id="drp_safe-{0}agent_{1}-v2".format(an, map_name),
         #entry_point="gym_vrp.envs:VrpEnv",
         entry_point="drp_env.SafeMarlEnv.env_wrapper:SafeEnv",
         kwargs={
