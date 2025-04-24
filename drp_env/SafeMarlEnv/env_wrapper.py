@@ -28,7 +28,7 @@ class SafeEnv(DrpEnv):
 						if j != i and joint_action[i] == joint_action[j]: #act8-2
 							joint_action[i] = self.current_start[i] #act8-3
 							ri_act -= 5*self.speed
-							i = 0
+							i = 0 #条件が変わる可能性があるため，最初から
 							break
 
 			#act9，正面衝突
