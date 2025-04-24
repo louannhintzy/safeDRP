@@ -25,11 +25,11 @@ class SafeEnv(DrpEnv):
 			if act8_flag:
 				if self.current_goal[i] == None:
 					for j in range(self.agent_num):
-						if j != i:
-							if joint_action[i] == joint_action[j]: #act8-2
-								joint_action[i] = self.current_start[i] #act8-3
-								ri_act -= 5*self.speed
-								break
+						if j != i and joint_action[i] == joint_action[j]: #act8-2
+							joint_action[i] = self.current_start[i] #act8-3
+							ri_act -= 5*self.speed
+							i = 0
+							break
 
 			#act9，正面衝突
 			act9_flag = True
@@ -37,10 +37,10 @@ class SafeEnv(DrpEnv):
 				#自分がノード上にいる時
 				if self.current_goal[i] == None:
 					for j in range(self.agent_num):
-						if j != i:
-							if joint_action[j] == self.current_start[i] and joint_action[i] == self.current_start[j]:
+						if j != i and (joint_action[j] == self.current_start[i] and joint_action[i] == self.current_start[j]):
 								joint_action[i] = self.current_start[i]
 								ri_act -= 5*self.speed
+								i = 0
 								break
 							
 			ri_tmp.append(ri_act)
