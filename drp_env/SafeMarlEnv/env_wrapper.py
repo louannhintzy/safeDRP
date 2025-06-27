@@ -11,51 +11,39 @@ from drp_env.EE_map import MapMake
 from drp_env.drp_env import DrpEnv
 
 class SafeEnv(DrpEnv):
+
 	def step(self, joint_action):
 
-		ri_tmp = []
+		task_assign = None
+		if isinstance(joint_action, dict):
+			task_assign = joint_action.get("task", None)
+			joint_action = joint_action.get("agent", joint_action)
 
-		for i in range(self.agent_num):
+		i = 0
+		do = True
 
-			ri_act = 0
-
-			#act8，他のエージェントと向かう先が同じ場合 
-			act8_flag = True
-			#自分がノード上にいる時
-			if act8_flag:
+		while do:
+			do = False
+			for i in range(self.agent_num):
+				#act8，他のエージェントと向かう先が同じ場合 
+				#自分がノード上にいる時
 				if self.current_goal[i] == None:
 					for j in range(self.agent_num):
-						if j != i and joint_action[i] == joint_action[j]: #act8-2
-							joint_action[i] = self.current_start[i] #act8-3
-							ri_act -= 5*self.speed
-							i = 0 #条件が変わる可能性があるため，最初から
+						if j != i and joint_action[i] == joint_action[j]: 
+							joint_action[i] = self.current_start[i] 
+							do = True #条件が変わる可能性があるため，もう一度ループを回す
 							break
 
-			#act9，正面衝突
-			act9_flag = True
-			if act9_flag:
+				#act9，正面衝突
 				#自分がノード上にいる時
 				if self.current_goal[i] == None:
 					for j in range(self.agent_num):
 						if j != i and (joint_action[j] == self.current_start[i] and joint_action[i] == self.current_start[j]):
-								joint_action[i] = self.current_start[i]
-								ri_act -= 5*self.speed
-								i = 0
-								break
-							
-			ri_tmp.append(ri_act)
-		
+							joint_action[i] = self.current_start[i]
+							do = True
+							break
+
+		joint_action = {"agent": joint_action, "task": task_assign} if task_assign is not None else joint_action
 		obs, ri_array, self.terminated, info = super().step(joint_action)
 
-		for i in range(self.agent_num):
-			ri_array[i] += ri_tmp[i]
-	
 		return obs, ri_array, self.terminated, info
-	
-
-	def reset(self, seed=None, options=None):
-		obs = super().reset()
-		return obs
-	
-	def valid_action_mask(self):
-		pass
