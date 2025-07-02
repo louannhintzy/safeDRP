@@ -25,7 +25,7 @@ class SafeEnv(DrpEnv):
 		while do:
 			do = False
 			for i in range(self.agent_num):
-				#act8，If another agent is heading to the same destination 
+				#If another agent is heading to the same destination 
 				#When the agent is on a node
 				if self.current_goal[i] == None:
 					for j in range(self.agent_num):
@@ -34,7 +34,7 @@ class SafeEnv(DrpEnv):
 							do = True #条件が変わる可能性があるため，もう一度ループを回す
 							break
 
-				#act9，If a head-on collision with another agent is likely
+				#If a head-on collision with another agent is likely
 				#When the agent is on a node
 				if self.current_goal[i] == None:
 					for j in range(self.agent_num):
