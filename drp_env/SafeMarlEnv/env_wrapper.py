@@ -19,9 +19,11 @@ class SafeEnv(DrpEnv):
 			task_assign = joint_action.get("task", None)
 			joint_action = joint_action.get("agent", joint_action)
 
+		#for i in range(self.agent_num):
+		#	print('numero agent:', i, 'self.current_start:', self.current_start[i],'self.current_goal:', self.current_goal[i],'joint_action:', joint_action[i],'goal:', self.goal_array[i])
+
 		i = 0
 		do = True
-
 		while do:
 			do = False
 			for i in range(self.agent_num):
@@ -32,6 +34,9 @@ class SafeEnv(DrpEnv):
 						if j != i and joint_action[i] == joint_action[j]: 
 							joint_action[i] = self.current_start[i] 
 							do = True #条件が変わる可能性があるため，もう一度ループを回す
+							#print('a')	
+							#print('joint_action:', joint_action)
+
 							break
 
 				#If a head-on collision with another agent is likely
@@ -43,7 +48,8 @@ class SafeEnv(DrpEnv):
 							do = True
 							break
 
-		joint_action = {"agent": joint_action, "task": task_assign} if task_assign is not None else joint_action
+		#joint_action = {"agent": joint_action, "task": task_assign} if task_assign is not None else joint_action
+		
 		obs, ri_array, self.terminated, info = super().step(joint_action)
 
 		return obs, ri_array, self.terminated, info

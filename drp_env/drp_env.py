@@ -4,6 +4,7 @@ import sys
 import copy
 import os
 import time
+import networkx as nx
 
 
 from drp_env.state_repre import REGISTRY
@@ -71,9 +72,9 @@ class DrpEnv(gym.Env):
 		obs_box = self.obs_manager.get_obs_box()
 		self.observation_space = gym.spaces.Tuple(tuple([obs_box] * self.agent_num))
 
-		self.mycount=0
+		self.mycount=0 #nouveau 
 
-		self.log = {}
+		self.log = {} #nouveau
 
 		
 
@@ -159,7 +160,8 @@ class DrpEnv(gym.Env):
 			action_i = joint_action[i]
 			#for DRPChallenge
 			#if i==1:
-			#	print(joint_action)
+			#print("Agent", i)
+			#print("joint action de i", action_i)
 
 			# 1) first judge action_i whether available, to output obs_prepare: 
 			# if unavailable ⇢ obs_prepare.append( self.obs_old[i])
@@ -362,3 +364,52 @@ class DrpEnv(gym.Env):
 			pos_list.append(pos)
 
 		return pos_list
+
+
+	def probability_rule_based(self):
+		x = self.episode_account
+		#C = 1e4
+		#p = 0.9 * (1 / (1 + 0.00005 * x)) #fonction inverse agressive
+		#p = 0.9 * (1 + (-np.log(1 + x)) / np.log(self.t_max * 0.1))
+		p = 0.9 * (1 + (-np.log(1 + x)) / np.log(3000000 * 0.1))
+		
+		#p = 0.9 / np.sqrt(1 + x / C)
+		#print ('pourcentage de rule-based:', p*100, '%')
+		return np.random.rand() < p
+
+
+	def shortest_path_action(self,joint_action):
+		actions = []
+		for i in range(self.agent_num):
+			current = self.current_start[i]
+			goal = self.goal_array[i]
+			try:
+				path = nx.shortest_path(self.G, source=current, target=goal)
+				next_node = path[1] if len(path) > 1 else current
+				print('agent', i, 'next_node:', next_node, 'shortest path')
+			except nx.NetworkXNoPath:
+				next_node = current
+				print('agent', i, 'next_node:', next_node, 'except')
+
+			avail_nodes = self.get_avail_agent_actions(i, self.n_actions)[1]
+			print('agent', i, 'avail_nodes:', avail_nodes,'self.current_start:', self.current_start[i],'self.current_goal:', self.current_goal[i])
+
+			if next_node not in avail_nodes:
+				next_node = avail_nodes[0]
+				print('agent', i, 'next_node:', next_node, 'next_node not in avail_nodes')
+
+			actions.append(next_node)
+
+		return actions
+	
+
+	def action_policy(self, joint_action):
+		#print("action_policy called with:", joint_action)
+		if self.probability_rule_based():
+			print("action_policy returning rule-based:")
+			return self.shortest_path_action(joint_action)  # Rule-based policy
+			
+		else:
+			print("action_policy returning RL")
+			return joint_action  # RL pur
+		
