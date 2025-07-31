@@ -108,14 +108,14 @@ class DrpEnv(gym.Env):
 		else:
 			sys.exit()
 		"""
-		print("self.start_ori_array", self.start_ori_array)
+		#print("self.start_ori_array", self.start_ori_array)
 		if self.start_ori_array == []:
 			self.ee_env.random_start()
 			self.start_ori_array = self.ee_env.start_ori_array
 		if self.goal_array == []:
 			self.ee_env.random_goal()
 			self.goal_array = self.ee_env.goal_array
-		print("self.start_ori_array after", self.start_ori_array)
+		#print("self.start_ori_array after", self.start_ori_array)
 
 		#initialize obs
 		self.obs = tuple(np.array([self.pos[self.start_ori_array[i]][0], self.pos[self.start_ori_array[i]][1], self.start_ori_array[i], self.goal_array[i]]) for i in range(self.agent_num))
@@ -138,7 +138,7 @@ class DrpEnv(gym.Env):
 		self.reach_account = 0
 		self.step_account = 0
 		self.episode_account += 1
-		print('Environment reset obs: \n', self.obs)
+		#print('Environment reset obs: \n', self.obs)
 
 		obs = self.obs_manager.calc_obs()
 
@@ -150,6 +150,8 @@ class DrpEnv(gym.Env):
 		#transite env based on joint_action
 		self.step_account += 1
 		self.obs_current_chache = copy.deepcopy(self.obs)
+
+		#print('obs:', self.obs)
 
 		self.obs_prepare = []
 		self.obs_onehot_prepare = copy.deepcopy(self.obs_onehot)
@@ -265,7 +267,7 @@ class DrpEnv(gym.Env):
 				ri_array.append(ri)
 			
 			if self.terminated == [True for _ in range(self.agent_num)]: # all reach goal
-				print("!!!all reach goal!!!")
+				#print("!!!all reach goal!!!")
 				self.reach_account = 0
 				# info
 				info["goal"] = True
@@ -277,7 +279,7 @@ class DrpEnv(gym.Env):
 
 		# Check whether time is over
 		if self.step_account >= self.time_limit:
-			print("!!!time up!!!")
+			#print("!!!time up!!!")
 			info["timeup"]= True
 			self.terminated = [True for _ in range(self.agent_num)]
 
@@ -342,7 +344,7 @@ class DrpEnv(gym.Env):
 		) # a must be a angle !!!list!!!
 
 	def close(self):
-		print('Environment CLOSE')
+		# print('Environment CLOSE')
 		return None
 
     
@@ -371,7 +373,7 @@ class DrpEnv(gym.Env):
 		#C = 1e4
 		#p = 0.9 * (1 / (1 + 0.00005 * x)) #fonction inverse agressive
 		#p = 0.9 * (1 + (-np.log(1 + x)) / np.log(self.t_max * 0.1))
-		p = 0.9 * (1 + (-np.log(1 + x)) / np.log(3000000 * 0.1))
+		p = 0.9 * (1 + (-np.log(1 + x)) / np.log(3000000 * 0.1* 0.1))
 		
 		#p = 0.9 / np.sqrt(1 + x / C)
 		#print ('pourcentage de rule-based:', p*100, '%')
@@ -386,17 +388,40 @@ class DrpEnv(gym.Env):
 			try:
 				path = nx.shortest_path(self.G, source=current, target=goal)
 				next_node = path[1] if len(path) > 1 else current
-				print('agent', i, 'next_node:', next_node, 'shortest path')
+				#print('agent', i, 'next_node:', next_node, 'shortest path')
 			except nx.NetworkXNoPath:
 				next_node = current
-				print('agent', i, 'next_node:', next_node, 'except')
+				#print('agent', i, 'next_node:', next_node, 'except')
 
-			avail_nodes = self.get_avail_agent_actions(i, self.n_actions)[1]
-			print('agent', i, 'avail_nodes:', avail_nodes,'self.current_start:', self.current_start[i],'self.current_goal:', self.current_goal[i])
+			#print('next node de', i,':', next_node)
+
+			avail_nodes = self.get_avail_agent_actions(i, self.n_actions)[1] # pour la regle des edge
+			#print ('avail_nodes full de', i, avail_nodes)
+			#print('agent', i, 'avail_nodes:', avail_nodes,'self.current_start:', self.current_start[i],'self.current_goal:', self.current_goal[i])
+			#print('joint_action',joint_action)
+			for j in range (self.agent_num):
+				if j != i:
+					
+					if joint_action[j] in avail_nodes:
+						avail_nodes.remove(joint_action[j])
+						#print ('avail_nodes after 1 de', i,  avail_nodes)
+
+					if ([self.obs[j][0],self.obs[j][1]]==self.pos[joint_action[j]]) or ([self.obs[j][0],self.obs[j][1]]==self.pos[self.goal_array[j]]): #is the agent j is at its final position en x,y
+						#print(' the agent j is at its final position', j)
+						#print('self.pos[self.goal_array[j]]', self.pos[self.goal_array[j]])
+						if self.goal_array[j] in avail_nodes:
+							#print('self.current_goal[j] is in avail_nodes')
+							avail_nodes.remove(self.goal_array[j])
+							#print ('avail_nodes after 2 de', i,  avail_nodes)
+					
 
 			if next_node not in avail_nodes:
-				next_node = avail_nodes[0]
-				print('agent', i, 'next_node:', next_node, 'next_node not in avail_nodes')
+				if len(avail_nodes) == 0:
+					#print('no available nodes, agent', i, 'next_node:', next_node, 'avail_nodes:', avail_nodes)
+					next_node = current
+				else:
+					next_node = avail_nodes[0]
+				#print('agent', i, 'next_node:', next_node, 'next_node not in avail_nodes')
 
 			actions.append(next_node)
 
@@ -406,10 +431,24 @@ class DrpEnv(gym.Env):
 	def action_policy(self, joint_action):
 		#print("action_policy called with:", joint_action)
 		if self.probability_rule_based():
-			print("action_policy returning rule-based:")
-			return self.shortest_path_action(joint_action)  # Rule-based policy
-			
+			#print("action_policy returning rule-based:")
+			changed_shortest_path = self.shortest_path_action(joint_action)  # Rule-based policy
+
+			return self.action_policy_verifying(changed_shortest_path) 
+			 
 		else:
-			print("action_policy returning RL")
+			#print("action_policy returning RL")
 			return joint_action  # RL pur
+	
+
+	def action_policy_verifying (self, joint_action):
+		# This function is used to verify the action policy
+		# It checks if the joint_action is valid and returns it
+		valid_joint_action = []
+
+		#for i in range(self.agent_num):
+
+
+		#return valid_joint_action
+		return joint_action
 		

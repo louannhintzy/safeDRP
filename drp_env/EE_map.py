@@ -61,8 +61,8 @@ class MapMake():
 		
 		self.base_nodes = base_nodes
 
-		print('Start node for each agent', self.start_ori_array)
-		print('Goal node for each agent', self.goal_array)
+		#print('Start node for each agent', self.start_ori_array)
+		#print('Goal node for each agent', self.goal_array)
 
 		#self.start1_ori,self.goal1=0,5
 		#self.start2_ori,self.goal2=3,4
@@ -257,7 +257,7 @@ class MapMake():
 
 				if distance_ij<5:
 					collision_flag = 1
-					print('!!!collision!!! with agent',i,j)
+					#print('!!!collision!!! with agent',i,j)
 		
 		return collision_flag
 """
