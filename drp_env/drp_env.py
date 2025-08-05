@@ -401,10 +401,9 @@ class DrpEnv(gym.Env):
 			#print('joint_action',joint_action)
 			for j in range (self.agent_num):
 				if j != i:
-					
-					if joint_action[j] in avail_nodes:
-						avail_nodes.remove(joint_action[j])
-						#print ('avail_nodes after 1 de', i,  avail_nodes)
+					if self.current_goal[j] in avail_nodes:
+						avail_nodes.remove(self.current_goal[j])
+						print ('avail_nodes after 1 de', i,  avail_nodes)
 
 					if ([self.obs[j][0],self.obs[j][1]]==self.pos[joint_action[j]]) or ([self.obs[j][0],self.obs[j][1]]==self.pos[self.goal_array[j]]): #is the agent j is at its final position en x,y
 						#print(' the agent j is at its final position', j)
