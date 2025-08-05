@@ -411,15 +411,12 @@ class DrpEnv(gym.Env):
 				next_node = path[1] if len(path) > 1 else current
 			except nx.NetworkXNoPath:
 				next_node = current
-
-			avail_nodes = set(self.get_avail_agent_actions(i, self.n_actions)[1])
+			
 			# Retirer les nœuds réservés par d'autres agents
-			#avail_nodes -= reserved_nodes - {self.current_goal[i], self.goal_array[i]}
+			new_next_node = self.action_policy_verifying(next_node,i)
 
-			if next_node not in avail_nodes:
-				next_node = current if not avail_nodes else list(avail_nodes)[0]
+			actions.append(new_next_node)
 
-			actions.append(next_node)
 
 		return actions
 		
@@ -430,19 +427,16 @@ class DrpEnv(gym.Env):
 			print("action_policy returning rule-based:")
 			changed_shortest_path = self.shortest_path_action(joint_action)  # Rule-based policy
 
-			return self.action_policy_verifying(changed_shortest_path) 
+			return changed_shortest_path
 			 
 		else:
 			print("action_policy returning RL")
 			return joint_action  # RL pur
 
 
-	def action_policy_verifying (self, joint_action):
+	def action_policy_verifying (self, next_node,i):
 		# It checks if the joint_action is valid and returns it
-		valid_joint_action = []
-
-          
-
-		#return valid_joint_action
-		return joint_action
-		
+		avail_nodes = set(self.get_avail_agent_actions(i, self.n_actions)[1])
+		if next_node not in avail_nodes:
+			next_node = current if not avail_nodes else list(avail_nodes)[0]
+		return next_node
