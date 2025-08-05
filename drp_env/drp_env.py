@@ -192,6 +192,8 @@ class DrpEnv(gym.Env):
 				y = current_goal[1] - current_y1
 				dist_to_cgoal = np.sqrt(np.square(x) + np.square(y))# the distance to current goal
 
+				print("i", i, "dist_to_cgoal", dist_to_cgoal, 'self.speed', self.speed)
+
 				if dist_to_cgoal>self.speed:# move on edge
 					current_x1 = round(current_x1+(self.speed*x/dist_to_cgoal), 2)
 					current_y1 = round(current_y1+(self.speed*y/dist_to_cgoal), 2)
@@ -383,14 +385,14 @@ class DrpEnv(gym.Env):
 	def shortest_path_action(self, joint_action):
 		actions = []
 		# Construire la liste des nœuds déjà ciblés ou occupés
-		reserved_nodes = set()
-		for j in range(self.agent_num):
+		#reserved_nodes = set()
+		#for j in range(self.agent_num):
 			# Nœud où l'agent j va (current_goal) ou où il est déjà (current_start)
-			if self.current_goal[j] is not None:
-				reserved_nodes.add(self.current_goal[j])
+			#if self.current_goal[j] is not None:
+			#	reserved_nodes.add(self.current_goal[j])
 			# Si l'agent est déjà à sa position finale
-			if ([self.obs[j][0], self.obs[j][1]] == self.pos[self.goal_array[j]]):
-				reserved_nodes.add(self.goal_array[j])
+			#if ([self.obs[j][0], self.obs[j][1]] == self.pos[self.goal_array[j]]):
+			#	reserved_nodes.add(self.goal_array[j])
 
 		"""
 		for agent_num:
@@ -412,7 +414,7 @@ class DrpEnv(gym.Env):
 
 			avail_nodes = set(self.get_avail_agent_actions(i, self.n_actions)[1])
 			# Retirer les nœuds réservés par d'autres agents
-			avail_nodes -= reserved_nodes - {self.current_goal[i], self.goal_array[i]}
+			#avail_nodes -= reserved_nodes - {self.current_goal[i], self.goal_array[i]}
 
 			if next_node not in avail_nodes:
 				next_node = current if not avail_nodes else list(avail_nodes)[0]
@@ -420,7 +422,7 @@ class DrpEnv(gym.Env):
 			actions.append(next_node)
 
 		return actions
-	
+		
 
 	def action_policy(self, joint_action):
 		#print("action_policy called with:", joint_action)
@@ -431,9 +433,9 @@ class DrpEnv(gym.Env):
 			return self.action_policy_verifying(changed_shortest_path) 
 			 
 		else:
-			#print("action_policy returning RL")
+			print("action_policy returning RL")
 			return joint_action  # RL pur
-	
+
 
 	def action_policy_verifying (self, joint_action):
 		# It checks if the joint_action is valid and returns it
