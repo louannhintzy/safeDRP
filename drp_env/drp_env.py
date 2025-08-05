@@ -200,7 +200,7 @@ class DrpEnv(gym.Env):
 					# for one-hot state
 					x = list(self.pos[self.current_start[i]])[0] - current_x1
 					y = list(self.pos[self.current_start[i]])[1] - current_y1
-					dist_to_cstart = np.sqrt(np.square(x) + np.square(y))# the distance to current goal
+					dist_to_cstart = np.sqrt(np.square(x) + np.square(y))# the distance to current start
 					dist_to_cstart_rate = round(dist_to_cstart/(dist_to_cstart+dist_to_cgoal), 2)
 					
 					#print("self.obs_onehot_prepare before",self.obs_onehot_prepare )
@@ -380,47 +380,42 @@ class DrpEnv(gym.Env):
 		return np.random.rand() < p
 
 
-	def shortest_path_action(self,joint_action):
+	def shortest_path_action(self, joint_action):
 		actions = []
+		# Construire la liste des nœuds déjà ciblés ou occupés
+		reserved_nodes = set()
+		for j in range(self.agent_num):
+			# Nœud où l'agent j va (current_goal) ou où il est déjà (current_start)
+			if self.current_goal[j] is not None:
+				reserved_nodes.add(self.current_goal[j])
+			# Si l'agent est déjà à sa position finale
+			if ([self.obs[j][0], self.obs[j][1]] == self.pos[self.goal_array[j]]):
+				reserved_nodes.add(self.goal_array[j])
+
+		"""
+		for agent_num:
+		if agent is at node:
+			action = shortest path
+
+		else:
+			action = same action
+		"""
+
 		for i in range(self.agent_num):
 			current = self.current_start[i]
 			goal = self.goal_array[i]
 			try:
 				path = nx.shortest_path(self.G, source=current, target=goal)
 				next_node = path[1] if len(path) > 1 else current
-				#print('agent', i, 'next_node:', next_node, 'shortest path')
 			except nx.NetworkXNoPath:
 				next_node = current
-				#print('agent', i, 'next_node:', next_node, 'except')
 
-			#print('next node de', i,':', next_node)
-
-			avail_nodes = self.get_avail_agent_actions(i, self.n_actions)[1] # pour la regle des edge
-			#print ('avail_nodes full de', i, avail_nodes)
-			#print('agent', i, 'avail_nodes:', avail_nodes,'self.current_start:', self.current_start[i],'self.current_goal:', self.current_goal[i])
-			#print('joint_action',joint_action)
-			for j in range (self.agent_num):
-				if j != i:
-					if self.current_goal[j] in avail_nodes:
-						avail_nodes.remove(self.current_goal[j])
-						print ('avail_nodes after 1 de', i,  avail_nodes)
-
-					if ([self.obs[j][0],self.obs[j][1]]==self.pos[joint_action[j]]) or ([self.obs[j][0],self.obs[j][1]]==self.pos[self.goal_array[j]]): #is the agent j is at its final position en x,y
-						#print(' the agent j is at its final position', j)
-						#print('self.pos[self.goal_array[j]]', self.pos[self.goal_array[j]])
-						if self.goal_array[j] in avail_nodes:
-							#print('self.current_goal[j] is in avail_nodes')
-							avail_nodes.remove(self.goal_array[j])
-							#print ('avail_nodes after 2 de', i,  avail_nodes)
-					
+			avail_nodes = set(self.get_avail_agent_actions(i, self.n_actions)[1])
+			# Retirer les nœuds réservés par d'autres agents
+			avail_nodes -= reserved_nodes - {self.current_goal[i], self.goal_array[i]}
 
 			if next_node not in avail_nodes:
-				if len(avail_nodes) == 0:
-					#print('no available nodes, agent', i, 'next_node:', next_node, 'avail_nodes:', avail_nodes)
-					next_node = current
-				else:
-					next_node = avail_nodes[0]
-				#print('agent', i, 'next_node:', next_node, 'next_node not in avail_nodes')
+				next_node = current if not avail_nodes else list(avail_nodes)[0]
 
 			actions.append(next_node)
 
@@ -430,7 +425,7 @@ class DrpEnv(gym.Env):
 	def action_policy(self, joint_action):
 		#print("action_policy called with:", joint_action)
 		if self.probability_rule_based():
-			#print("action_policy returning rule-based:")
+			print("action_policy returning rule-based:")
 			changed_shortest_path = self.shortest_path_action(joint_action)  # Rule-based policy
 
 			return self.action_policy_verifying(changed_shortest_path) 
@@ -441,12 +436,10 @@ class DrpEnv(gym.Env):
 	
 
 	def action_policy_verifying (self, joint_action):
-		# This function is used to verify the action policy
 		# It checks if the joint_action is valid and returns it
 		valid_joint_action = []
 
-		#for i in range(self.agent_num):
-
+          
 
 		#return valid_joint_action
 		return joint_action
