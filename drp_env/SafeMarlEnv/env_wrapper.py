@@ -57,11 +57,7 @@ class SafeEnv(DrpEnv):
 		#joint_action = {"agent": joint_action, "task": task_assign} if task_assign is not None else joint_action
 		#joint_action = self.action_policy(joint_action)
 
-		# print('fin du choix de la joint action 😘')
-
-		#for i in range(self.agent_num):
-		#	print('numero agent:', i, '   self.current_start:', self.current_start[i],'   self.current_goal:', self.current_goal[i],'   joint_action:', joint_action[i],'   goal:', self.goal_array[i], '   obs de i:', self.obs_onehot[i])
-		#print('\n')
+		#print('fin du choix de la joint action 🦋')
 
 		obs, ri_array, self.terminated, info = super().step(joint_action)
 

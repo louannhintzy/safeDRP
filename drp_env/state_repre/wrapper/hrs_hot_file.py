@@ -22,7 +22,7 @@ def hrs_hot_func(env,n_obs):
             
             #total distance
             shortest_path_distance=round(shortest_path_length_after+dist_to_ava_action_j,2)
-
+            
             #plus waiting time if there exist
             if str([n_obs[agi][0],n_obs[agi][1]]) in [str(ele) for ele in env.pos.values()]: #s=(0.0, 5.0)
                 node=[k for k, v in env.pos.items() if str(v) == str([n_obs[agi][0],n_obs[agi][1]]) ][0]  #node 0

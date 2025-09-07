@@ -192,7 +192,7 @@ class DrpEnv(gym.Env):
 				y = current_goal[1] - current_y1
 				dist_to_cgoal = np.sqrt(np.square(x) + np.square(y))# the distance to current goal
 
-				print("i", i, "dist_to_cgoal", dist_to_cgoal, 'self.speed', self.speed)
+				#print("i", i, "dist_to_cgoal", dist_to_cgoal, 'self.speed', self.speed)
 
 				if dist_to_cgoal>self.speed:# move on edge
 					current_x1 = round(current_x1+(self.speed*x/dist_to_cgoal), 2)
@@ -408,8 +408,8 @@ class DrpEnv(gym.Env):
 			changed_shortest_path = self.shortest_path_action(joint_action)
 			return changed_shortest_path		 
 		else:
-			print("action_policy returning RL")
-			return joint_action  # RL pur
+			#print("action_policy returning RL")
+			return joint_action 
 
 
 	# function that checks if the action is valid, otherwise change it to a valid one

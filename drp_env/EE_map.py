@@ -24,7 +24,7 @@ UNREAL_MAP = [
 class MapMake():
 
 	def __init__(self, agent_num, start_ori_array, goal_array, map_name):
-		print('MapMake initialized')
+		#print('MapMake initialized')
 		self.agent_num = agent_num
 
 		base_nodes = [0,2]
@@ -38,16 +38,22 @@ class MapMake():
 		self.G, self.pos, self.edge_labels = self.Graph_initial(csv_nodes_number, csv_nodes_pos, csv_edges, csv_edges_weights)
 		# self.n_nodes = len(self.G.nodes())
 		if self.agent_num > len(csv_nodes_number) :
-			print('Error: The number of agents exceeds the maximum numberof nodes on the graph')
+			#print('Error: The number of agents exceeds the maximum numberof nodes on the graph')
 			self.sta_code = 0
 			self.close()
 			sys.exit(0)
 		else:
-			print('Mal Environment initialized')
+			#print('Mal Environment initialized')
+		#print('num_edges/num_nodes', self.G.number_of_edges() / self.G.number_of_nodes())
+		#print('Agent numbers', self.agent_num)
+		#diameter = nx.diameter(self.G) if nx.is_connected(self.G) else self.G.number_of_nodes()
+		#print('diameter', diameter)
+		#print('\n')
+		#print('density = nx.density(G)', nx.density(self.G))
+		#print('\n')
+		
 
-		print('Agent numbers', self.agent_num)
-
-    # assignd by user
+	# assignd by user
 		self.input_start_ori_array = copy.deepcopy(start_ori_array)
 		self.input_goal_array = copy.deepcopy(goal_array)
 		
@@ -149,7 +155,6 @@ class MapMake():
 		nx.draw_networkx_edge_labels(G, pos, edge_labels=self.edge_labels) #エッジのラベルを描画
 		#nx.draw_networkx_node_labels(G, pos, node_labels=node_labels) #エッジのラベルを描画
 		nx.draw_networkx(self.G, with_labels = True,pos=self.pos,alpha=0.2, node_size=170, node_color='lightblue')
-      
 
 	def plot_map_dynamic(self, delay ,obs_old, obs, goal_array, agent_num, joint_action_old, reach_account, step, episode):# a must be a angle !!!list!!!
 		self.agent_num = agent_num
@@ -285,3 +290,4 @@ if __name__ == '__main__':
     Map.plot_map(pos) # a must be a angle !!!list!!!
 """
 
+	
