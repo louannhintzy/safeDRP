@@ -43,28 +43,23 @@ class MapMake():
 			self.close()
 			sys.exit(0)
 		else:
-			#print('Mal Environment initialized')
-		#print('num_edges/num_nodes', self.G.number_of_edges() / self.G.number_of_nodes())
-		#print('Agent numbers', self.agent_num)
-		#diameter = nx.diameter(self.G) if nx.is_connected(self.G) else self.G.number_of_nodes()
-		#print('diameter', diameter)
-		#print('\n')
-		#print('density = nx.density(G)', nx.density(self.G))
-		#print('\n')
-		
+			print('Mal Environment initialized')
 
-	# assignd by user
+		#print('Agent numbers', self.agent_num)
+
+		# assigned by user
+
 		self.input_start_ori_array = copy.deepcopy(start_ori_array)
 		self.input_goal_array = copy.deepcopy(goal_array)
-		
+
 		self.start_ori_array = copy.deepcopy(self.input_start_ori_array)
 		self.goal_array = copy.deepcopy(self.input_goal_array)
-		
-		if self.input_start_ori_array==[]:
+
+		if self.input_start_ori_array == []:
 			self.random_start()
-		if self.input_goal_array==[]:
+		if self.input_goal_array == []:
 			self.random_goal()
-		
+
 		self.base_nodes = base_nodes
 
 		#print('Start node for each agent', self.start_ori_array)
