@@ -23,7 +23,9 @@ This uses safe wrapper "dep_env/SafeMarlEnv/env_wrapper"
 python3 src/main.py --config=qmix --env-config=gymma with env_args.time_limit=100 env_args.key="drp_env:drp_safe-4agent_map_8x5-v2" env_args.state_repre_flag="onehot_fov"
 ```
 
-Hybrid Action Policy Extension  
+---
+
+## Hybrid Action Policy Extension  
 
 Our approach employs a hybrid action policy: a combination of **rule-based navigation** and **reinforcement learning (RL)**.  
 
@@ -34,7 +36,7 @@ Our approach employs a hybrid action policy: a combination of **rule-based navig
   - Over time: the rule-based influence decreases with episode index.  
 
 
-Implementation highlights  
+## Implementation highlights  
 
 - `probability_rule_based()` : returns probability of following rule-based policy (decreases with training).  
 - `shortest_path_action(joint_action)` : computes valid shortest-path actions.  
@@ -42,7 +44,7 @@ Implementation highlights
 - `action_policy_verifying(next_node, i)` : ensures validity of chosen actions.  
 - `get_map_complexity()` : calculates a numerical complexity score for the map.  
 
-Benefits: 
+## Benefits: 
 
 Stabilizes early training with rule-based guidance.
 Encourages adaptive, generalized behavior as RL influence grows.
