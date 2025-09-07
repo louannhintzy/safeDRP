@@ -368,40 +368,22 @@ class DrpEnv(gym.Env):
 			pos_list.append(pos)
 
 		return pos_list
-
-
+	
+	# function that returns the probability to choose rule-based policy
 	def probability_rule_based(self):
 		x = self.episode_account
-		#C = 1e4
-		#p = 0.9 * (1 / (1 + 0.00005 * x)) #fonction inverse agressive
-		#p = 0.9 * (1 + (-np.log(1 + x)) / np.log(self.t_max * 0.1))
-		p = 0.9 * (1 + (-np.log(1 + x)) / np.log(3000000 * 0.1* 0.1))
-		
-		#p = 0.9 / np.sqrt(1 + x / C)
-		#print ('pourcentage de rule-based:', p*100, '%')
+		#complexity = self.ee_env.get_map_complexity()
+		#denom = np.log(10000 *2* complexity) 
+		#p = 0.9 * (1 + (-np.log(1 + x)) / denom)
+		C = 8000000
+		p = 0.9 * (1 + (-np.log(1 + x)) / np.log(C))
+
 		return np.random.rand() < p
 
 
+	# function that returns the joint action based on shortest path
 	def shortest_path_action(self, joint_action):
 		actions = []
-		# Construire la liste des nœuds déjà ciblés ou occupés
-		#reserved_nodes = set()
-		#for j in range(self.agent_num):
-			# Nœud où l'agent j va (current_goal) ou où il est déjà (current_start)
-			#if self.current_goal[j] is not None:
-			#	reserved_nodes.add(self.current_goal[j])
-			# Si l'agent est déjà à sa position finale
-			#if ([self.obs[j][0], self.obs[j][1]] == self.pos[self.goal_array[j]]):
-			#	reserved_nodes.add(self.goal_array[j])
-
-		"""
-		for agent_num:
-		if agent is at node:
-			action = shortest path
-
-		else:
-			action = same action
-		"""
 
 		for i in range(self.agent_num):
 			current = self.current_start[i]
@@ -412,30 +394,26 @@ class DrpEnv(gym.Env):
 			except nx.NetworkXNoPath:
 				next_node = current
 			
-			# Retirer les nœuds réservés par d'autres agents
+			# checks if the action is valid, otherwise change it to a valid one
 			new_next_node = self.action_policy_verifying(next_node,i)
 
 			actions.append(new_next_node)
 
-
 		return actions
 		
-
+	# function that returns the joint action based on a mix of RL and rule-based policy
 	def action_policy(self, joint_action):
-		#print("action_policy called with:", joint_action)
 		if self.probability_rule_based():
-			print("action_policy returning rule-based:")
-			changed_shortest_path = self.shortest_path_action(joint_action)  # Rule-based policy
-
-			return changed_shortest_path
-			 
+			#print("action_policy returning rule-based:")
+			changed_shortest_path = self.shortest_path_action(joint_action)
+			return changed_shortest_path		 
 		else:
 			print("action_policy returning RL")
 			return joint_action  # RL pur
 
 
+	# function that checks if the action is valid, otherwise change it to a valid one
 	def action_policy_verifying (self, next_node,i):
-		# It checks if the joint_action is valid and returns it
 		avail_nodes = set(self.get_avail_agent_actions(i, self.n_actions)[1])
 		if next_node not in avail_nodes:
 			next_node = current if not avail_nodes else list(avail_nodes)[0]

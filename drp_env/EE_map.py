@@ -260,6 +260,22 @@ class MapMake():
 					#print('!!!collision!!! with agent',i,j)
 		
 		return collision_flag
+	
+	#function that returns a numerical value representing the complexity of the map
+	def get_map_complexity(self):
+		N = self.G.number_of_nodes()
+		density = nx.density(self.G)  # between 0 and 1
+		agents = self.agent_num
+
+		# Base complexity: more nodes, lower density → harder
+		base_complexity = N * (1 / (0.5 + density))
+
+		# Adjust for agents with diminishing returns
+		effective_complexity = base_complexity * agents
+
+		return effective_complexity
+
+
 """
 if __name__ == '__main__':
     Map=MapMake()
